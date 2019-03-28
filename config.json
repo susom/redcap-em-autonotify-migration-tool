@@ -1,0 +1,69 @@
+{
+  "name": "Autonotify Migration Tool",
+
+  "namespace":"Stanford\\AutonotifyMigrationTool",
+
+  "description": "A tool to migrate from AutoNotify to the new Alerts and Notifications module after version 9.0 in REDCap",
+
+  "versions": [
+    { "0.1": "Initial" }
+  ],
+
+  "authors": [
+    {
+      "name": "Andrew Martin",
+      "email": "andy123@stanford.edu",
+      "institution": "Stanford University"
+    }
+  ],
+
+  "permissions": [
+  ],
+
+  "crons": [
+  ],
+
+  "links": {
+    "control-center": [
+      {
+        "name": "AutoNotify Global Migration Tool",
+        "icon": "gear",
+        "url": "amt_global.php"
+      }
+    ],
+    "project": [
+      {
+        "name": "AutoNotify Migration Tool",
+        "icon": "gear",
+        "url": "amt.php"
+      }
+    ]
+  },
+
+  "no-auth-pages": [
+  ],
+
+  "system-settings": [
+    {
+      "key": "enable-system-debug-logging",
+      "name": "<b>Enable Debug Logging (system-wide)</b><i>(Requires emLogger)</i>",
+      "required": false,
+      "type": "checkbox"
+    }
+  ],
+
+  "project-settings": [
+    {
+      "key": "enable-project-debug-logging",
+      "name": "<b>Enable Debug Logging</b><i>(Requires emLogger)</i>",
+      "required": false,
+      "type": "checkbox"
+    }
+  ],
+
+   "compatibility": {
+      "php-version-min": "5.4.0",
+      "redcap-version-min": "9.0.0",
+      "redcap-version-max": ""
+   }
+}
