@@ -26,16 +26,16 @@
   "links": {
     "control-center": [
       {
-        "name": "AutoNotify Global Migration Tool",
+        "name": "AutoNotify Migration Overview",
         "icon": "gear",
-        "url": "amt_global.php"
+        "url": "pages/amt_global.php"
       }
     ],
     "project": [
       {
         "name": "AutoNotify Migration Tool",
         "icon": "gear",
-        "url": "amt.php"
+        "url": "pages/amt.php"
       }
     ]
   },
@@ -54,6 +54,18 @@
 
   "project-settings": [
     {
+      "key": "status",
+      "name": "<b>Migration Status</b>",
+      "required": false,
+      "type": "text"
+    },
+    {
+      "key": "note",
+      "name": "<b>Notes</b>",
+      "required": false,
+      "type": "textarea"
+    },
+    {
       "key": "enable-project-debug-logging",
       "name": "<b>Enable Debug Logging</b><i>(Requires emLogger)</i>",
       "required": false,
@@ -63,7 +75,7 @@
 
    "compatibility": {
       "php-version-min": "5.4.0",
-      "redcap-version-min": "9.0.0",
+      "redcap-version-min": "8.0.0",
       "redcap-version-max": ""
    }
 }

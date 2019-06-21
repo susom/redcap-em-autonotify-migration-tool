@@ -17,3 +17,11 @@ Once a migration is complete, and the new alerts are active, you should remove t
 Once all projects have been migrated, you should remove the plugin from the system so no new projects are able to create more AutoNotify settings.
 
  
+ 
+
+
+During migration, AutoNotify rules are deactivated.  This means they should no longer fire so participants shouldn't
+receive multiple notifications (one from AutoNotify and one from Alerts and Notifications).
+
+However, the DET url is left in-tact so if you are using the pre- and post- DET URL options at the bottom of
+AutoNotify, they should continue to work (but both will occur PRE or POST Alerts and Notifications -- I haven't tested)

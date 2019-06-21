@@ -1,13 +1,144 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andy123
- * Date: 2019-03-22
- * Time: 11:17
- */
-
 namespace Stanford\AutonotifyMigrationTool;
 
+
+class Alert {
+
+    public $project_id;
+    public $module;
+
+    public function __construct($project_id, $module)
+    {
+        $this->project_id = $project_id;
+        $this->module = $module;
+    }
+
+
+    /**
+     * See if an alert exists in this project
+     * @param $title
+     * @return bool
+     */
+    public function doesAlertExist($title) {
+        $sql = "select count(*) from redcap_alerts where " .
+            "    alert_title    = '" . db_real_escape_string($title) . "' " .
+            "and project_id     = " . intval($this->project_id);
+        $q = db_query($sql);
+        return db_result($q,0);
+    }
+
+
+
+    /**
+     * @param $trigger
+     * @return bool | \mysqli_result
+     */
+    public function createAlertFromTrigger($trigger){
+        /*
+            [title] => Test2
+            [logic] => [send(1)] = "1"
+            [test_record] => 1
+            [test_event] =>
+            [to] => andy123@stanford.edu
+            [cc] =>
+            [bcc] =>
+            [from] => no-reply@stanford.edu
+            [subject] => Trigger TEST2
+            [template] => standard
+            [body] => BODY HERE    Piping:  redcord id: [record_id]
+            [file_field] => 0
+            [file_event] =>
+            [enabled] => 1
+        */
+
+        $alert_title        = trim($trigger['title']);
+        $alert_condition    = $trigger['logic'];
+        $email_from         = $trigger['from'];
+        $email_to           = $trigger['to'];
+        $email_cc           = $trigger['cc'];
+        $email_bcc          = $trigger['bcc'];
+        $email_subject      = $trigger['subject'];
+        $alert_message      = $trigger['body'];
+        $enabled            = $trigger['enabled'];
+
+        $sql = "insert into redcap_alerts set " .
+            "project_id = " . intval($this->project_id) .
+            ", email_incomplete = 1" .
+            ", alert_title = '" . db_real_escape_string($alert_title) . "'" .
+            ($enabled == 1           ? "" : ", email_deleted = 1") .
+            (empty($alert_condition) ? "" : ", alert_condition = '" . db_real_escape_string($alert_condition) . "'") .
+            (empty($email_from)      ? "" : ", email_from = '"      . db_real_escape_string($email_from) . "'") .
+            (empty($email_to)        ? "" : ", email_to = '"        . db_real_escape_string($email_to) . "'") .
+            (empty($email_cc)        ? "" : ", email_cc = '"        . db_real_escape_string($email_cc) . "'") .
+            (empty($email_bcc)       ? "" : ", email_bcc = '"       . db_real_escape_string($email_bcc) . "'") .
+            (empty($email_subject)   ? "" : ", email_subject = '"   . db_real_escape_string($email_subject) . "'") .
+            (empty($alert_message)   ? "" : ", alert_message = '"   . db_real_escape_string($alert_message) . "'");
+
+        // $this->module->emDebug("SQL:" . $sql);
+
+        $q = db_query($sql);
+        $id = db_insert_id();
+        // $this->module->emDebug($q, $id);
+        return $id;
+    }
+
+
+    /**
+     * DELETE ANY ALERTS FOR THE CURRENT PROJECT
+     * @param $project_id
+     */
+    public function clearAlertsFromProject($project_id) {
+        $sql = "delete from redcap_alerts where project_id = " . intval($project_id);
+        $q = db_query($sql);
+        $this->module->emDebug($q);
+    }
+
+
+
+    /**
+     * BUILD THE ALERT HISTORY FROM THE AUTONOTIFY NOTIFICATION ARRAY
+     * @param $new_id
+     * @param $notification
+     * @param $trigger
+     * @return bool|\mysqli_result
+     */
+    public function createNotificationFromAutoNotifyAlert($new_id, $notification, $trigger) {
+
+        // $this->module->emDebug($new_id, $notification);
+
+        $sql = "insert into redcap_alerts_sent set " .
+            "alert_id = " . intval($new_id) .
+            ", record = '" . db_real_escape_string($notification['record']) . "'" .
+            ", last_sent = '" . db_real_escape_string($notification['last_sent']) . "'" .
+            (empty($notification['event_id']) ? "" : ", event_id = " . intval($notification['event_id']));
+
+        // $this->module->emDebug($sql);
+        $q = db_query($sql);
+        $count = db_affected_rows();
+
+        if ($q) {
+            $sql = "insert into redcap_alerts_sent_log set " .
+                "alert_sent_id = " . intval(db_insert_id()) .
+                ", time_sent =  '" . db_real_escape_string($notification['last_sent']) . "'" .
+                ", email_from = '" . db_real_escape_string($trigger['from'])           . "'" .
+                ", subject =    '" . db_real_escape_string($trigger['subject'])        . "'" .
+                ", message =    '" . db_real_escape_string($trigger['body'])           . "'" .
+                (empty($trigger['to'])  ? "" : ", email_to  = '" . db_real_escape_string($trigger['to'])  . "'" ) .
+                (empty($trigger['cc'])  ? "" : ", email_cc  = '" . db_real_escape_string($trigger['cc'])  . "'" ) .
+                (empty($trigger['bcc']) ? "" : ", email_bcc = '" . db_real_escape_string($trigger['bcc']) . "'" )
+            ;
+
+            // $this->module->emDebug($sql);
+            $q = db_query($sql);
+        }
+
+        return $q ? $count : FALSE;
+    }
+
+
+
+
+}
 
 /*
 
@@ -185,10 +316,3 @@ create index time_sent
 
 
  */
-
-
-
-class Alert
-{
-
-}
